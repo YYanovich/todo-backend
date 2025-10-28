@@ -3,26 +3,37 @@ import TODO from "../models/todoModel.js";
 
 export const getAllTodo = async (req: Request, res: Response) => {
   try {
-      const page = Number(req.query.page) || 1
-      const limit = Number(req.query.limit) || 10
-      const offset = (page-1)*limit
-      const totalTodo = await TODO.countDocuments()
-      const totalPages = Math.ceil(totalTodo / limit)
-      const todo = await TODO.find().sort({ createdAt: -1 }).skip(offset).limit(limit);
-      res.status(200).json({
-        todo,
-        totalTodo,
-        totalPages,
-        offset,
-        page,
-        limit
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const totalTodo = await TODO.countDocuments();
+    const totalPages = Math.ceil(totalTodo / limit);
+    const todo = await TODO.find()
+      .sort({ createdAt: -1 })
+      .skip(offset)
+      .limit(limit);
+    res.status(200).json({
+      todo,
+      totalTodo,
+      totalPages,
+      offset,
+      page,
+      limit,
     });
   } catch (err: any) {
-    console.error("Error with getting todo list:", err);
-    res.status(500).json({
-      message: "Error with getting todo list",
-      error: err.message || err,
+    console.error("Error with getting todo list:", {
+      message: err?.message || err,
+      path: req.originalUrl,
+      method: req.method,
+      origin: req.headers.origin,
+      stack: err?.stack,
     });
+    res
+      .status(500)
+      .json({
+        message: "Error with getting todo list",
+        error: err?.message || String(err),
+      });
   }
 };
 
@@ -41,8 +52,18 @@ export const createTodo = async (req: Request, res: Response) => {
     });
     res.status(201).json(addTodo);
   } catch (err: any) {
-    console.error(`Error with adding new todo`, err);
-    res.status(500).json({ message: `Error with adding new todo`, err });
+    console.error(`Error with adding new todo:`, {
+      message: err?.message || err,
+      path: req.originalUrl,
+      origin: req.headers.origin,
+      stack: err?.stack,
+    });
+    res
+      .status(500)
+      .json({
+        message: `Error with adding new todo`,
+        error: err?.message || String(err),
+      });
   }
 };
 
@@ -52,8 +73,18 @@ export const deleteTodo = async (req: Request, res: Response) => {
     const deleteTodo = await TODO.findByIdAndDelete(id);
     return res.status(200).json(deleteTodo);
   } catch (err: any) {
-    console.error("Error with deleting todo", err);
-    return res.status(500).json({ message: "Error with deleting todo", err });
+    console.error("Error with deleting todo", {
+      message: err?.message || err,
+      path: req.originalUrl,
+      origin: req.headers.origin,
+      stack: err?.stack,
+    });
+    return res
+      .status(500)
+      .json({
+        message: "Error with deleting todo",
+        error: err?.message || String(err),
+      });
   }
 };
 
@@ -74,7 +105,17 @@ export const updateTodo = async (req: Request, res: Response) => {
     );
     res.status(200).json(updateTodo);
   } catch (err: any) {
-    console.error("Erro with updating todo", err);
-    return res.status(500).json({ message: "Erro with updating todo", err });
+    console.error("Erro with updating todo", {
+      message: err?.message || err,
+      path: req.originalUrl,
+      origin: req.headers.origin,
+      stack: err?.stack,
+    });
+    return res
+      .status(500)
+      .json({
+        message: "Erro with updating todo",
+        error: err?.message || String(err),
+      });
   }
 };
